@@ -2,6 +2,9 @@
 
 > **Substack Draft / 科幻短篇小說**  
 > *副標題：當全世界都在暴力敲擊這座鋼筋水泥的網頁城牆時，我只握著妳留下的暗號，悄然推開那扇未鎖的大門。*
+>
+> 🌐 **全息實境互動體驗（SVG 動畫與語音旁白）**：[https://projectlottery.vercel.app](https://projectlottery.vercel.app)  
+> 🐙 **開源金庫工程代碼（GitHub Repository）**：[https://github.com/pppeee861005/crawler-mansion-heist](https://github.com/pppeee861005/crawler-mansion-heist)
 
 ---
 
@@ -105,3 +108,13 @@ pure_gold = safe["drawNumberSize"][:6]
 ---
 
 *(完)*
+
+---
+
+### 📡 關於本篇的工程現實與互動彩蛋
+
+本篇故事中描述的「大區地址」與「豪宅位置圖」皆取材自真實的現代 API 逆向工程思維：
+
+* 🎬 **親手操作特務奪金**：你可以前往 [https://projectlottery.vercel.app](https://projectlottery.vercel.app) ，觀看以純前端 SVG 與 Web Speech 語音合成打造的互動式章節演示。
+* 💻 **取得真正的開金腳本**：完整的 Python 實作程式碼已開源至 GitHub：[https://github.com/pppeee861005/crawler-mansion-heist](https://github.com/pppeee861005/crawler-mansion-heist) 。歡迎前往 Star 與 Fork，開始你的數字探險。
+
