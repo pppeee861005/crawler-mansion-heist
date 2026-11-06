@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>現代爬蟲：豪宅奪金記 (SVG 故事動畫)</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(22, 27, 46, 0.85);
+      --gold: #f59e0b;
+      --gold-light: #fbbf24;
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --purple: #8b5cf6;
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* SVG 舞臺區 */
+    .stage-wrapper {
+      background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(245, 158, 11, 0.05);
+      overflow: hidden;
+      position: relative;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* 控制面板區 */
+    .dashboard {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* 故事劇情卡片 */
+    .story-card {
+      border-left: 4px solid var(--gold);
+      padding: 12px 18px;
+      background: rgba(245, 158, 11, 0.08);
+      border-radius: 0 10px 10px 0;
+      transition: all 0.3s ease;
+    }
+
+    .story-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .story-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    .code-preview {
+      margin-top: 10px;
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      color: #38bdf8;
+      overflow-x: auto;
+    }
+
+    /* 操作按鈕組 */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #334155;
+      border-color: #94a3b8;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: none;
+      color: #000;
+      font-weight: 700;
+    }
+
+    button.primary:hover {
+      filter: brightness(1.15);
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+    }
+
+    /* 步驟指標點 */
+    .stepper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 1px solid #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .step-dot.active {
+      background: var(--gold);
+      color: #0f172a;
+      border-color: var(--gold-light);
+      transform: scale(1.1);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+    }
+
+    /* SVG 樣式與動畫效果 */
+    .glow-gold {
+      filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
+    }
+
+    .glow-cyan {
+      filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.8));
+    }
+
+    .glow-emerald {
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));
+    }
+
+    .agent-car, .key-packet, .safe-doors, .gold-stack {
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    .radar-pulse {
+      animation: pulse 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🏰 豪宅藏寶圖：奪金大作戰</h1>
+    <p class="subtitle">現代爬蟲工程師的優雅潛入藝術 —— 用 SVG 動畫說一個奪金故事</p>
+  </header>
+
+  <div class="container">
+    <!-- SVG 動畫舞臺 -->
+    <div class="stage-wrapper">
+      <svg id="stage" viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- 背景網格光暈 -->
+          <linearGradient id="wallGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e293b" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+          </linearGradient>
+
+          <!-- 金條高光漸變 -->
+          <linearGradient id="goldBarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fef08a"/>
+            <stop offset="30%" stop-color="#f59e0b"/>
+            <stop offset="70%" stop-color="#d97706"/>
+            <stop offset="100%" stop-color="#b45309"/>
+          </linearGradient>
+
+          <!-- 激光掃描 -->
+          <linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#06b6d4" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#06b6d4" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 舞臺背景：豪宅藍圖格線 -->
+        <g stroke="#334155" stroke-width="0.5" stroke-dasharray="4 4" opacity="0.4">
+          <line x1="0" y1="120" x2="900" y2="120" />
+          <line x1="0" y1="240" x2="900" y2="240" />
+          <line x1="0" y1="360" x2="900" y2="360" />
+          <line x1="225" y1="0" x2="225" y2="480" />
+          <line x1="450" y1="0" x2="450" y2="480" />
+          <line x1="675" y1="0" x2="675" y2="480" />
+        </g>
+
+        <!-- 場景 1：大區地標與大門 (URL / Mansion Entrance) -->
+        <g id="zone-entrance">
+          <!-- 豪宅大門建築外框 -->
+          <rect x="50" y="60" width="180" height="340" rx="14" fill="url(#wallGrad)" stroke="#475569" stroke-width="2"/>
+          <text x="140" y="95" fill="#f8fafc" font-size="14" font-weight="bold" text-anchor="middle">🏛️ 大區地址 (API URL)</text>
+          <text x="140" y="115" fill="#94a3b8" font-size="10" text-anchor="middle">api.taiwanlottery.com</text>
+
+          <!-- 豪宅鐵捲門 (Gate) -->
+          <rect id="mansion-gate" x="70" y="140" width="140" height="230" rx="8" fill="#1e293b" stroke="#0ea5e9" stroke-width="2"/>
+          <line x1="70" y1="200" x2="210" y2="200" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="70" y1="260" x2="210" y2="260" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="70" y1="320" x2="210" y2="320" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="3 3"/>
+          <text id="gate-label" x="140" y="240" fill="#38bdf8" font-size="14" font-weight="bold" text-anchor="middle">門禁關閉</text>
+
+          <!-- 雷達信號波 -->
+          <circle id="radar-signal" cx="140" cy="235" r="45" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0"/>
+        </g>
+
+        <!-- 連接通訊管道 (Pipeline 1 -> 2) -->
+        <path d="M 230 230 L 290 230" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+        <circle id="pulse-dot-1" cx="230" cy="230" r="4" fill="#06b6d4" opacity="0"/>
+
+        <!-- 場景 2：豪宅平面位置圖 (JSON House Map) -->
+        <g id="zone-map">
+          <rect x="290" y="60" width="180" height="340" rx="14" fill="url(#wallGrad)" stroke="#475569" stroke-width="2"/>
+          <text x="380" y="95" fill="#f8fafc" font-size="14" font-weight="bold" text-anchor="middle">🗺️ 豪宅位置圖 (JSON)</text>
+          <text x="380" y="115" fill="#94a3b8" font-size="10" text-anchor="middle">response.json()</text>
+
+          <!-- 建築樓層/房間樹狀圖 -->
+          <rect id="map-room-1" x="310" y="140" width="140" height="45" rx="6" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
+          <text x="325" y="167" fill="#cbd5e1" font-size="12" font-family="monospace">"rtCode": 0</text>
+
+          <rect id="map-room-2" x="310" y="200" width="140" height="170" rx="6" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
+          <text x="325" y="225" fill="#cbd5e1" font-size="12" font-family="monospace">"content": {</text>
+          <text id="map-highlight-vault" x="335" y="255" fill="#94a3b8" font-size="11" font-family="monospace">"super638Res":</text>
+          <text x="345" y="275" fill="#94a3b8" font-size="11" font-family="monospace">[ 保險箱清單 ]</text>
+          <text x="325" y="350" fill="#cbd5e1" font-size="12" font-family="monospace">}</text>
+        </g>
+
+        <!-- 連接通訊管道 (Pipeline 2 -> 3) -->
+        <path d="M 470 270 L 530 270" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+        <circle id="pulse-dot-2" cx="470" cy="270" r="4" fill="#a855f7" opacity="0"/>
+
+        <!-- 場景 3：地下金庫大廳 (Vault / Period Records) -->
+        <g id="zone-vault">
+          <rect x="530" y="60" width="170" height="340" rx="14" fill="url(#wallGrad)" stroke="#475569" stroke-width="2"/>
+          <text x="615" y="95" fill="#f8fafc" font-size="14" font-weight="bold" text-anchor="middle">🔒 地下金庫 (Vault)</text>
+          <text x="615" y="115" fill="#94a3b8" font-size="10" text-anchor="middle">期數保險箱陣列</text>
+
+          <!-- 三座垂直保險箱 -->
+          <!-- 保險箱 A (最新期數) -->
+          <g id="safe-box-target">
+            <rect x="548" y="145" width="134" height="65" rx="8" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.5"/>
+            <circle cx="568" cy="177" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/>
+            <line x1="568" y1="172" x2="568" y2="182" stroke="#fbbf24" stroke-width="2"/>
+            <text x="590" y="172" fill="#f8fafc" font-size="11" font-weight="bold">第 115089 期</text>
+            <text x="590" y="190" fill="#a855f7" font-size="10" font-family="monospace">["drawNumberSize"]</text>
+          </g>
+
+          <!-- 保險箱 B -->
+          <g opacity="0.6">
+            <rect x="548" y="225" width="134" height="65" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+            <circle cx="568" cy="257" r="10" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
+            <text x="590" y="255" fill="#94a3b8" font-size="11">第 115088 期</text>
+          </g>
+
+          <!-- 保險箱 C -->
+          <g opacity="0.35">
+            <rect x="548" y="305" width="134" height="65" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+            <circle cx="568" cy="337" r="10" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+            <text x="590" y="335" fill="#64748b" font-size="11">第 115087 期...</text>
+          </g>
+        </g>
+
+        <!-- 連接輸送帶 (Pipeline 3 -> 4) -->
+        <path d="M 700 177 L 740 177" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+
+        <!-- 場景 4：純金提領處 (Gold Extraction [:6]) -->
+        <g id="zone-gold">
+          <rect x="740" y="60" width="135" height="340" rx="14" fill="url(#wallGrad)" stroke="#475569" stroke-width="2"/>
+          <text x="807" y="95" fill="#f8fafc" font-size="14" font-weight="bold" text-anchor="middle">💰 純金進袋</text>
+          <text x="807" y="115" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">Slicing [:6]</text>
+
+          <!-- 金條掉落收集槽 -->
+          <rect x="752" y="140" width="110" height="240" rx="8" fill="#020617" stroke="#334155" stroke-width="1.5"/>
+
+          <!-- 6 條純金條 (預設藏在保險箱，動畫時飛入) -->
+          <g id="gold-group">
+            <g class="bar-unit" id="bar-1" transform="translate(760, 335)">
+              <rect width="94" height="24" rx="4" fill="url(#goldBarGrad)" stroke="#fef08a" stroke-width="1"/>
+              <text x="47" y="16" fill="#000" font-size="11" font-weight="900" text-anchor="middle">18</text>
+            </g>
+            <g class="bar-unit" id="bar-2" transform="translate(760, 305)">
+              <rect width="94" height="24" rx="4" fill="url(#goldBarGrad)" stroke="#fef08a" stroke-width="1"/>
+              <text x="47" y="16" fill="#000" font-size="11" font-weight="900" text-anchor="middle">19</text>
+            </g>
+            <g class="bar-unit" id="bar-3" transform="translate(760, 275)">
+              <rect width="94" height="24" rx="4" fill="url(#goldBarGrad)" stroke="#fef08a" stroke-width="1"/>
+              <text x="47" y="16" fill="#000" font-size="11" font-weight="900" text-anchor="middle">25</text>
+            </g>
+            <g class="bar-unit" id="bar-4" transform="translate(760, 245)">
+              <rect width="94" height="24" rx="4" fill="url(#goldBarGrad)" stroke="#fef08a" stroke-width="1"/>
+              <text x="47" y="16" fill="#000" font-size="11" font-weight="900" text-anchor="middle">33</text>
+            </g>
+            <g class="bar-unit" id="bar-5" transform="translate(760, 215)">
+              <rect width="94" height="24" rx="4" fill="url(#goldBarGrad)" stroke="#fef08a" stroke-width="1"/>
+              <text x="47" y="16" fill="#000" font-size="11" font-weight="900" text-anchor="middle">36</text>
+            </g>
+            <g class="bar-unit" id="bar-6" transform="translate(760, 185)">
+              <rect width="94" height="24" rx="4" fill="url(#goldBarGrad)" stroke="#fef08a" stroke-width="1"/>
+              <text x="47" y="16" fill="#000" font-size="11" font-weight="900" text-anchor="middle">37</text>
+            </g>
+
+            <!-- 被捨棄的第 7 顆特別號 (銀色/暗色表示被過濾) -->
+            <g id="discard-ball" transform="translate(782, 148)" opacity="0">
+              <circle cx="15" cy="15" r="14" fill="#475569" stroke="#94a3b8" stroke-width="1.5"/>
+              <text x="15" y="19" fill="#cbd5e1" font-size="11" font-weight="bold" text-anchor="middle">6</text>
+              <line x1="2" y1="2" x2="28" y2="28" stroke="#ef4444" stroke-width="2"/>
+            </g>
+          </g>
+
+          <text id="done-badge" x="807" y="365" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle" opacity="0">✅ 奪金成功</text>
+        </g>
+
+        <!-- 爬蟲特務無人機/小跑車 (Agent Cursor) -->
+        <g id="agent" transform="translate(140, 420)">
+          <circle cx="0" cy="0" r="16" fill="#0284c7" stroke="#38bdf8" stroke-width="2" class="glow-cyan"/>
+          <polygon points="-6,-6 10,0 -6,6" fill="#fff"/>
+          <text x="0" y="28" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">Agent</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- 故事儀表板 -->
+    <div class="dashboard">
+      <div class="story-card" id="story-box">
+        <div class="story-title" id="story-title">
+          <span>🏁 準備出發</span>
+        </div>
+        <div class="story-desc" id="story-desc">
+          點擊下方「下一步」或「自動播放」，特務將攜帶 GET 暗號出發，為您示範如何優雅地從台彩金庫帶走 6 塊純金條！
+        </div>
+        <div class="code-preview" id="code-snippet">
+          # 準備好出發了嗎？點擊【開始行動】
+        </div>
+      </div>
+
+      <!-- 控制按鈕 -->
+      <div class="controls">
+        <div class="stepper">
+          <div class="step-dot active" data-step="0">1</div>
+          <div class="step-dot" data-step="1">2</div>
+          <div class="step-dot" data-step="2">3</div>
+          <div class="step-dot" data-step="3">4</div>
+        </div>
+
+        <div class="btn-group">
+          <button id="prevBtn">◀ 上一步</button>
+          <button id="nextBtn" class="primary">下一步 ▶</button>
+          <button id="autoBtn">▶ 自動播放</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 故事章節資料庫
+    const chapters = [
+      {
+        step: 0,
+        title: "📍 第一幕：鎖定「大區地址」發送 GET 暗號",
+        desc: "傳統爬蟲拿十字鎬辛苦敲網頁 HTML，而內行工程師只拿『大區地址（API URL）』。我們不硬闖，而是客氣地敲門發送一個 <code>GET</code> 請求，豪宅大門應聲敞開！",
+        code: `url = f"https://api.taiwanlottery.com/...Result?month={start}&endMonth={end}&pageSize=200"\nres = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})`,
+        agentPos: { x: 140, y: 340 },
+        action: () => {
+          document.getElementById('mansion-gate').setAttribute('fill', '#0c4a6e');
+          document.getElementById('mansion-gate').setAttribute('stroke', '#38bdf8');
+          document.getElementById('gate-label').textContent = '大門已開 (200 OK)';
+          document.getElementById('gate-label').setAttribute('fill', '#38bdf8');
+          document.getElementById('radar-signal').setAttribute('opacity', '1');
+          document.getElementById('radar-signal').classList.add('radar-pulse');
+          resetGold(false);
+        }
+      },
+      {
+        step: 1,
+        title: "🗺️ 第二幕：展開「豪宅平面位置圖」（解析 JSON）",
+        desc: "門一開，後端管線直接雙手奉上整棟豪宅的完整格局圖！呼叫 <code>res.json()</code>，所有房間編號、保險箱藏身處（<code>content -> superLotto638Res</code>）全都一目了然。",
+        code: `house_map = res.json()\nvault = house_map["content"]["superLotto638Res"]  # 直通地下金庫`,
+        agentPos: { x: 380, y: 320 },
+        action: () => {
+          document.getElementById('map-room-2').setAttribute('stroke', '#a855f7');
+          document.getElementById('map-highlight-vault').setAttribute('fill', '#c084fc');
+          document.getElementById('map-highlight-vault').setAttribute('font-weight', 'bold');
+        }
+      },
+      {
+        step: 2,
+        title: "🔒 第三幕：深入「地下金庫大廳」鎖定保險箱",
+        desc: "走進地下金庫，每一期的開獎資料都封存在獨立的保險箱中。我們直奔最新一期的保險箱，指名拉開印著 <code>['drawNumberSize']</code> 的號碼抽屜！",
+        code: `safe = vault[0]  # 最新一期保險箱\nballs = safe["drawNumberSize"]  # 抽屜裡放著開出的 7 顆球`,
+        agentPos: { x: 615, y: 177 },
+        action: () => {
+          document.getElementById('safe-box-target').querySelector('rect').setAttribute('stroke', '#fbbf24');
+          document.getElementById('safe-box-target').querySelector('rect').setAttribute('fill', '#451a03');
+          document.getElementById('discard-ball').setAttribute('opacity', '0');
+        }
+      },
+      {
+        step: 3,
+        title: "💰 第四幕：切片神技 <code>[:6]</code>，只帶走 6 塊純金！",
+        desc: "保險箱裡共有 7 顆號碼球（前 6 顆是第一區，最後 1 顆是第二區特別號）。我們使用極致精煉的 Python 切片 <code>[:6]</code>，捨棄雜質，純金條瞬間滑入背包！",
+        code: `# 列表推導式：瞬間掃走每一期的 6 塊純金條！\ngold_bars = [safe["drawNumberSize"][:6] for safe in vault]`,
+        agentPos: { x: 807, y: 140 },
+        action: () => {
+          revealGold();
+        }
+      }
+    ];
+
+    let currentStep = 0;
+    let autoPlayTimer = null;
+
+    const agent = document.getElementById('agent');
+    const storyTitle = document.getElementById('story-title');
+    const storyDesc = document.getElementById('story-desc');
+    const codeSnippet = document.getElementById('code-snippet');
+    const stepDots = document.querySelectorAll('.step-dot');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const autoBtn = document.getElementById('autoBtn');
+
+    function resetGold(hide = true) {
+      const bars = document.querySelectorAll('.bar-unit');
+      bars.forEach(bar => {
+        bar.style.opacity = hide ? '0' : '0.2';
+      });
+      document.getElementById('discard-ball').setAttribute('opacity', '0');
+      document.getElementById('done-badge').setAttribute('opacity', '0');
+    }
+
+    function revealGold() {
+      const bars = document.querySelectorAll('.bar-unit');
+      bars.forEach((bar, index) => {
+        setTimeout(() => {
+          bar.style.opacity = '1';
+          bar.classList.add('glow-gold');
+        }, index * 120);
+      });
+
+      setTimeout(() => {
+        document.getElementById('discard-ball').setAttribute('opacity', '1');
+        document.getElementById('done-badge').setAttribute('opacity', '1');
+      }, 750);
+    }
+
+    function renderStep(index) {
+      currentStep = index;
+      const data = chapters[index];
+
+      // 更新特務位置 (平滑移動)
+      agent.style.transform = `translate(${data.agentPos.x}px, ${data.agentPos.y}px)`;
+
+      // 更新說明文字
+      storyTitle.innerHTML = data.title;
+      storyDesc.innerHTML = data.desc;
+      codeSnippet.textContent = data.code;
+
+      // 觸發場景機關
+      data.action();
+
+      // 更新指示燈
+      stepDots.forEach((dot, i) => {
+        if (i === index) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+
+      // 更新按鈕狀態
+      prevBtn.disabled = index === 0;
+      if (index === chapters.length - 1) {
+        nextBtn.textContent = "🎉 奪金完畢 (重播)";
+      } else {
+        nextBtn.textContent = "下一步 ▶";
+      }
+    }
+
+    // 事件監聽
+    nextBtn.addEventListener('click', () => {
+      if (currentStep < chapters.length - 1) {
+        renderStep(currentStep + 1);
+      } else {
+        renderStep(0);
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentStep > 0) {
+        renderStep(currentStep - 1);
+      }
+    });
+
+    stepDots.forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        const step = parseInt(e.target.dataset.step);
+        renderStep(step);
+      });
+    });
+
+    autoBtn.addEventListener('click', () => {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+        autoBtn.textContent = "▶ 自動播放";
+        autoBtn.classList.remove('primary');
+      } else {
+        autoBtn.textContent = "⏸ 暫停播放";
+        autoBtn.classList.add('primary');
+        if (currentStep === chapters.length - 1) renderStep(0);
+        autoPlayTimer = setInterval(() => {
+          if (currentStep < chapters.length - 1) {
+            renderStep(currentStep + 1);
+          } else {
+            clearInterval(autoPlayTimer);
+            autoPlayTimer = null;
+            autoBtn.textContent = "▶ 自動播放";
+            autoBtn.classList.remove('primary');
+          }
+        }, 3200);
+      }
+    });
+
+    // 初始化第 0 步
+    resetGold(false);
+    renderStep(0);
+  </script>
+</body>
+</html>
