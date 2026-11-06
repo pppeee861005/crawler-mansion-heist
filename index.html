@@ -482,6 +482,7 @@
         </div>
 
         <div class="btn-group">
+          <button id="voiceBtn" class="badge-link badge-vercel" style="cursor:pointer; font-size:0.95rem; padding:10px 16px;">🔊 語音朗讀: 開啟</button>
           <button id="prevBtn">◀ 上一步</button>
           <button id="nextBtn" class="primary">下一步 ▶</button>
           <button id="autoBtn">▶ 自動播放</button>
@@ -497,6 +498,7 @@
         step: 0,
         title: "📍 第一幕：鎖定「大區地址」發送 GET 暗號",
         desc: "傳統爬蟲拿十字鎬辛苦敲網頁 HTML，而內行工程師只拿『大區地址（API URL）』。我們不硬闖，而是客氣地敲門發送一個 <code>GET</code> 請求，豪宅大門應聲敞開！",
+        voiceText: "第一幕：鎖定大區地址，發送 GET 暗號。傳統爬蟲拿十字鎬辛苦敲網頁，內行工程師只拿 API 大區地址。我們客氣敲門，豪宅大門應聲敞開！",
         code: `url = f"https://api.taiwanlottery.com/...Result?month={start}&endMonth={end}&pageSize=200"\nres = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})`,
         agentPos: { x: 140, y: 340 },
         action: () => {
@@ -513,6 +515,7 @@
         step: 1,
         title: "🗺️ 第二幕：展開「豪宅平面位置圖」（解析 JSON）",
         desc: "門一開，後端管線直接雙手奉上整棟豪宅的完整格局圖！呼叫 <code>res.json()</code>，所有房間編號、保險箱藏身處（<code>content -> superLotto638Res</code>）全都一目了然。",
+        voiceText: "第二幕：展開豪宅平面位置圖。門一打開，後端直接奉上完整格局圖！呼叫 JSON，所有房間編號、地下金庫藏匿點，一目了然！",
         code: `house_map = res.json()\nvault = house_map["content"]["superLotto638Res"]  # 直通地下金庫`,
         agentPos: { x: 380, y: 320 },
         action: () => {
@@ -525,6 +528,7 @@
         step: 2,
         title: "🔒 第三幕：深入「地下金庫大廳」鎖定保險箱",
         desc: "走進地下金庫，每一期的開獎資料都封存在獨立的保險箱中。我們直奔最新一期的保險箱，指名拉開印著 <code>['drawNumberSize']</code> 的號碼抽屜！",
+        voiceText: "第三幕：深入地下金庫大廳。每一期的開獎資料都是獨立保險箱。我們直奔最新一期，拉開號碼抽屜！",
         code: `safe = vault[0]  # 最新一期保險箱\nballs = safe["drawNumberSize"]  # 抽屜裡放著開出的 7 顆球`,
         agentPos: { x: 615, y: 177 },
         action: () => {
@@ -537,6 +541,7 @@
         step: 3,
         title: "💰 第四幕：切片神技 <code>[:6]</code>，只帶走 6 塊純金！",
         desc: "保險箱裡共有 7 顆號碼球（前 6 顆是第一區，最後 1 顆是第二區特別號）。我們使用極致精煉的 Python 切片 <code>[:6]</code>，捨棄雜質，純金條瞬間滑入背包！",
+        voiceText: "第四幕：切片神技，只帶走六塊純金！保險箱裡有七顆球，我們用精煉的 Python 切片中括號冒號六，捨棄雜質，六塊發光純金條瞬間入袋，任務達成！",
         code: `# 列表推導式：瞬間掃走每一期的 6 塊純金條！\ngold_bars = [safe["drawNumberSize"][:6] for safe in vault]`,
         agentPos: { x: 807, y: 140 },
         action: () => {
@@ -547,6 +552,25 @@
 
     let currentStep = 0;
     let autoPlayTimer = null;
+    let isVoiceEnabled = true;
+
+    // Web Speech API 語音合成引擎
+    function speakStory(text) {
+      if (!isVoiceEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel(); // 停止上一句
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-TW';
+      utterance.rate = 1.05; // 稍快、更生動的語速
+      utterance.pitch = 1.1; // 輕快甜美的音調
+
+      // 優先選取高品質中文女聲
+      const voices = window.speechSynthesis.getVoices();
+      const twVoice = voices.find(v => v.lang.includes('zh-TW') || v.lang.includes('zh_TW') || v.name.includes('Taiwan') || v.name.includes('Yating') || v.name.includes('HanHan') || v.name.includes('Mei-Jia'));
+      if (twVoice) utterance.voice = twVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
 
     const agent = document.getElementById('agent');
     const storyTitle = document.getElementById('story-title');
@@ -556,6 +580,20 @@
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const autoBtn = document.getElementById('autoBtn');
+    const voiceBtn = document.getElementById('voiceBtn');
+
+    voiceBtn.addEventListener('click', () => {
+      isVoiceEnabled = !isVoiceEnabled;
+      if (isVoiceEnabled) {
+        voiceBtn.textContent = "🔊 語音朗讀: 開啟";
+        voiceBtn.style.opacity = "1";
+        speakStory(chapters[currentStep].voiceText);
+      } else {
+        voiceBtn.textContent = "🔇 語音朗讀: 關閉";
+        voiceBtn.style.opacity = "0.6";
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    });
 
     function resetGold(hide = true) {
       const bars = document.querySelectorAll('.bar-unit');
@@ -595,6 +633,9 @@
 
       // 觸發場景機關
       data.action();
+
+      // 觸發生動甜美語音朗讀
+      speakStory(data.voiceText);
 
       // 更新指示燈
       stepDots.forEach((dot, i) => {
